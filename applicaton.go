@@ -47,5 +47,10 @@ func (app *Application) CreateTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) ListTodos(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello World"))
+	todos, err := app.Queries.ListTodos(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	writeJson(w, todos, http.StatusOK)
 }

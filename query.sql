@@ -5,3 +5,7 @@ INSERT INTO todos (
 ) 
 VALUES(?, ?)
 RETURNING *;
+
+-- name: ListTodos :many
+SELECT *
+FROM todos

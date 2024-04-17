@@ -29,3 +29,31 @@ func (q *Queries) CreateTodo(ctx context.Context, arg CreateTodoParams) (Todo, e
 	err := row.Scan(&i.ID, &i.Task, &i.Done)
 	return i, err
 }
+
+const listTodos = `-- name: ListTodos :many
+SELECT id, task, done
+FROM todos
+`
+
+func (q *Queries) ListTodos(ctx context.Context) ([]Todo, error) {
+	rows, err := q.db.QueryContext(ctx, listTodos)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Todo
+	for rows.Next() {
+		var i Todo
+		if err := rows.Scan(&i.ID, &i.Task, &i.Done); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
