@@ -1,5 +1,10 @@
 package gotodo
 
+import (
+	"encoding/json"
+	"net/http"
+)
+
 func writeJson[t any](w http.ResponseWriter, payload t, statusCode int) error {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
@@ -11,4 +16,12 @@ func writeJson[t any](w http.ResponseWriter, payload t, statusCode int) error {
 	}
 
 	return nil
+}
+
+func btoi(b bool) int64 {
+	if b {
+		return 1
+	} else {
+		return 0
+	}
 }

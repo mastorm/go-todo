@@ -8,4 +8,10 @@ RETURNING *;
 
 -- name: ListTodos :many
 SELECT *
-FROM todos
+FROM todos;
+
+-- name: UpdateTodo :one
+UPDATE todos
+SET task = ?, done = ?
+WHERE id = ?
+RETURNING *;

@@ -4,8 +4,10 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"github.com/mastorm/go-todo/store"
 	"net/http"
+	"strconv"
+
+	"github.com/mastorm/go-todo/store"
 )
 
 //go:embed schema.sql
@@ -20,6 +22,7 @@ func (app *Application) Serve() {
 
 	mux.Handle("GET /todos", http.HandlerFunc(app.ListTodos))
 	mux.Handle("POST /todos", http.HandlerFunc(app.CreateTodo))
+	mux.Handle("PUT /todos/{id}", http.HandlerFunc(app.UpdateTodo))
 
 	http.ListenAndServe(":9001", mux)
 }
@@ -44,6 +47,34 @@ func (app *Application) CreateTodo(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(todo)
 
 	w.Write([]byte("Hello World"))
+}
+
+func (app *Application) UpdateTodo(w http.ResponseWriter, r *http.Request) {
+	var payload struct {
+		Task string `json:"task"`
+		Done bool   `json:"done"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&payload)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	changes := store.UpdateTodoParams{
+		ID:   int64(id),
+		Task: payload.Task,
+		Done: btoi(payload.Done),
+	}
+
+	updated, err := app.Queries.UpdateTodo(r.Context(), changes)
+
+	writeJson(w, updated, http.StatusOK)
 }
 
 func (app *Application) ListTodos(w http.ResponseWriter, r *http.Request) {

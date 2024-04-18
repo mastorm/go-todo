@@ -57,3 +57,23 @@ func (q *Queries) ListTodos(ctx context.Context) ([]Todo, error) {
 	}
 	return items, nil
 }
+
+const updateTodo = `-- name: UpdateTodo :one
+UPDATE todos
+SET task = ?, done = ?
+WHERE id = ?
+RETURNING id, task, done
+`
+
+type UpdateTodoParams struct {
+	Task string
+	Done int64
+	ID   int64
+}
+
+func (q *Queries) UpdateTodo(ctx context.Context, arg UpdateTodoParams) (Todo, error) {
+	row := q.db.QueryRowContext(ctx, updateTodo, arg.Task, arg.Done, arg.ID)
+	var i Todo
+	err := row.Scan(&i.ID, &i.Task, &i.Done)
+	return i, err
+}
