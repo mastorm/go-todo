@@ -10,9 +10,6 @@ import (
 	"github.com/mastorm/go-todo/store"
 )
 
-//go:embed schema.sql
-var DDL string
-
 type Application struct {
 	Queries *store.Queries
 }
